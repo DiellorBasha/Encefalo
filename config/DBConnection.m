@@ -19,16 +19,19 @@ classdef DBConnection
             end
         end
     end
-    methods (Static)
-        function obj = getInstance()
-            persistent uniqueInstance;
-            if isempty(uniqueInstance) || ~isvalid(uniqueInstance)
-                uniqueInstance = DBConnection();
-            end
-            uniqueInstance.createConnection(); % Ensure connection is active
-            obj = uniqueInstance;
+   methods (Static)
+    function obj = getInstance()
+        persistent uniqueInstance;
+        if isempty(uniqueInstance)
+            uniqueInstance = DBConnection();
+        else
+            % Since uniqueInstance already exists, ensure the connection is still open
+            uniqueInstance.createConnection(); % This will re-establish the connection if it's not open
         end
+        obj = uniqueInstance;
     end
+end
+
     methods
         % Method to get the connection object
         function conn = getConnection(obj)
