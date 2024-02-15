@@ -48,6 +48,10 @@ classdef (TableName = "sessions") Session < database.orm.mixin.Mappable
         histologyID int32 {mustBeNonnegative, mustBeInteger}
     end
 
+     properties (ExcludeFromDatabase) % Transient; it is not mapped to any database column
+        Channels
+     end
+
     methods
         function obj = Session(sessionID, animalID, name, projects, date, time, duration, depth, folderpath, notes, fileFormat, location, investigator, session_type_id, recordingFilePath, histologyID)
             if nargin ~= 0
@@ -99,6 +103,21 @@ classdef (TableName = "sessions") Session < database.orm.mixin.Mappable
                     obj(n).histologyID = histologyID(n);
                 end
             end
+        end
+    end
+
+    methods
+        % Method to load associated channels from the database
+        function obj = loadChannels(obj, conn)
+            if isempty(obj.sessionID)
+                warning('Session ID is empty. Cannot load channels.');
+                return;
+            end
+
+            % Assuming 'session.Channel' is the fully qualified name of your Channel ORM class
+            rf = rowfilter("sessionID");
+            rf = rf.sessionID == obj.sessionID;
+            obj.Channels = ormread(conn, 'channel.Channel', RowFilter = rf);
         end
     end
 end
