@@ -1,1 +1,1 @@
-conn = openDatabaseConnection();
+conn = openDatabaseConnection;
