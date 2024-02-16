@@ -5,8 +5,11 @@ classdef DBConnection
     methods (Access = private)
         % Private constructor
         function obj = DBConnection()
+           % Load database configuration
+            config = dbconfig();
+            
             % Initialize the database connection here
-            obj.Connection = database('sessionDatabase', 'root', 'Prizren1!');
+            obj.Connection = database(config.DatabaseName, config.Username, config.Password);
             % Check if connection was successful
             if ~isempty(obj.Connection.Message)
                 error(['Failed to connect to database: ', obj.Connection.Message]);
@@ -18,8 +21,10 @@ classdef DBConnection
         function createConnection(obj)
     try
         if isempty(obj.Connection) || (isvalid(obj.Connection) && ~isempty(obj.Connection.Message))
+           % Load database configuration
+            config = dbconfig();
             % Attempt to re-establish the connection if it's not valid
-            obj.Connection = database('sessionDatabase', 'root', 'Prizren1!');
+            obj.Connection = database(config.DatabaseName, config.Username, config.Password);
             if ~isempty(obj.Connection.Message)
                 error(['Failed to reconnect to database: ', obj.Connection.Message]);
             end
