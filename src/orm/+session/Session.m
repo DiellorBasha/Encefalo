@@ -50,6 +50,9 @@ classdef (TableName = "sessions") Session < database.orm.mixin.Mappable
 
      properties (ExcludeFromDatabase) % Transient; it is not mapped to any database column
         Channels
+        ROI
+        ROITable
+        Histology
      end
 
     methods
@@ -108,7 +111,7 @@ classdef (TableName = "sessions") Session < database.orm.mixin.Mappable
 
     methods
         % Method to load associated channels from the database
-        function obj = loadChannels(obj, conn)
+        function obj = readChannels(obj, conn)
             if isempty(obj.sessionID)
                 warning('Session ID is empty. Cannot load channels.');
                 return;
@@ -119,5 +122,34 @@ classdef (TableName = "sessions") Session < database.orm.mixin.Mappable
             rf = rf.sessionID == obj.sessionID;
             obj.Channels = ormread(conn, 'channel.Channel', RowFilter = rf);
         end
+
+        function obj = readROIs (obj, conn, roiType)
+            if isempty(obj.sessionID)
+                warning('Session ID is empty. Cannot load channels.');
+                return;
+            end
+
+            rf = rowfilter(["sessionID" "ROIType"]);
+            rf = rf.sessionID == obj.sessionID & rf.ROIType == roiType;
+            obj.ROI = ormread(conn, 'roi.ROI', RowFilter = rf);
+            obj.ROITable = ROIDB2Table (obj.ROI);
+        end
     end
+        methods(Static)
+        function sessionObj = getSession(conn, sessionID)
+            rf = rowfilter("sessionID");
+            rf = rf.sessionID == sessionID;
+            sessions = ormread(conn, 'session.Session', 'RowFilter', rf);
+
+            if isempty(sessions)
+                error('No session found with sessionID %d.', sessionID);
+            elseif numel(sessions) > 1
+                warning('More than one session found with sessionID %d. Using the first one.', sessionID);
+            end
+
+            sessionObj = sessions(1); % Assuming you want the first one if there are multiple
+            sessionObj = sessionObj.readChannels;
+        end
+    end
+   
 end

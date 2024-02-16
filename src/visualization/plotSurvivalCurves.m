@@ -1,4 +1,4 @@
-function plotSurvivalCurves(durationsWithoutRipples, durationsWithRipples)
+function plotSurvivalCurves(durationsWithoutRipples, durationsWithRipples, sessionID)
     % Calculate the empirical CDF for both groups
     [fWithoutRipples, xWithoutRipples] = ecdf(durationsWithoutRipples);
     [fWithRipples, xWithRipples] = ecdf(durationsWithRipples);
@@ -15,6 +15,6 @@ function plotSurvivalCurves(durationsWithoutRipples, durationsWithRipples)
     xlabel('Duration (units)');
     ylabel('Survival Probability');
     legend('Without Ripples', 'With Ripples');
-    title('Survival Curves for DOWN States');
+    title(sprintf('Survival Curves for DOWN States, Session: %d', sessionID));
     hold off;
 end
