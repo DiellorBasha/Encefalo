@@ -21,6 +21,10 @@ classdef (TableName = "channels") Channel < database.orm.mixin.Mappable
         numSamples int32 {mustBeNonnegative, mustBeInteger}
     end
 
+    properties (ExcludeFromDatabase)
+        signal
+    end
+    
     methods
         function obj = Channel(channelID, sessionID, channelName, channelTypeID, brainRegionID, fs, numSamples)
             if nargin ~= 0
@@ -52,12 +56,12 @@ classdef (TableName = "channels") Channel < database.orm.mixin.Mappable
         end
     end
 
+   
     methods
-      function obj = extractChannel(obj, ChannelName)
-            
+      function obj = extractChannel(obj, ChannelName, filePath)
             
             % Use obj.filePath directly
-            filestore = matlab.io.datastore.FileSet(obj.filePath);
+            filestore = matlab.io.datastore.FileSet(filePath);
 
             % Use obj.SignalVariableNames directly
             sds = signalDatastore(filestore, 'SignalVariableNames', ChannelName);
@@ -67,14 +71,11 @@ classdef (TableName = "channels") Channel < database.orm.mixin.Mappable
 
             % Update obj.data and obj.info
             dt = data.interval;
-            fs = round(1/dt);
-            name = data.title;
-            units = 'mV';
-            signal = double(data.values);
-            numSamples = data.length;
-            type = 'LFP';
-
-            obj.channel = Channel(name, fs, 'mV', signal);  % construct a channel
+            obj.fs = round(1/dt);
+            obj.channelName = data.title;
+            obj.signal = double(data.values);
+            obj.numSamples = data.length;
+            
       end
     end
 end

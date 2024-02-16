@@ -1,3 +1,4 @@
 
-    dbInstance = DBConnection.getInstance();
-    conn = dbInstance.getConnection();
+    % dbInstance = DBConnection.getInstance();
+    % conn = dbInstance.getConnection();
+conn = database('sessionDatabase','root','Prizren1!');

@@ -16,14 +16,24 @@ classdef DBConnection
     methods (Access = private)
         % Private method to actually create or verify the connection
         function createConnection(obj)
-            if isempty(obj.Connection) || ~isempty(obj.Connection.Message)
-                % Attempt to re-establish the connection if it's not valid
-                obj.Connection = database('sessionDatabase', 'root', 'Prizren1!');
-                if ~isempty(obj.Connection.Message)
-                    error(['Failed to reconnect to database: ', obj.Connection.Message]);
-                end
+    try
+        if isempty(obj.Connection) || (isvalid(obj.Connection) && ~isempty(obj.Connection.Message))
+            % Attempt to re-establish the connection if it's not valid
+            obj.Connection = database('sessionDatabase', 'root', 'Prizren1!');
+            if ~isempty(obj.Connection.Message)
+                error(['Failed to reconnect to database: ', obj.Connection.Message]);
             end
         end
+    catch ME
+        warning(['An error occurred while checking or re-establishing the database connection: ', ME.message]);
+        % Attempt to re-establish the connection
+        obj.Connection = database('sessionDatabase', 'root', 'Prizren1!');
+        if ~isempty(obj.Connection.Message)
+            error(['Failed to reconnect to database: ', obj.Connection.Message]);
+        end
+    end
+end
+
     end
     methods (Static)
         function obj = getInstance()
